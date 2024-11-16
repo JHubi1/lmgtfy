@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script>
+        // Enter the address of the website with trailing slash
+        // Empty for relative path urls, '/' for root path urls
+        const main = "";
+
+        // Enter the search engine url with $1 as the search query placeholder
+        const searchEngine = "https://google.com/search?q=$1";
+    </script>
+
+    <title>LMGTFY - Let Me Google That For You</title>
+    <meta name="description"
+        content="Are you nerved that people don't google themselves, but ask you to help? LMGTFY is the solution! Just send them a link and we'll google for you!">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --searchx: 0%;
+            --searchy: 0%;
+
+            --submitx: 0%;
+            --submity: 0%;
+        }
+
+        #top {
+            position: absolute;
+            top: 30%;
+            bottom: 30%;
+            left: 0;
+            right: 0;
+
+            & #side {
+                position: absolute;
+                left: 27%;
+                right: 27%;
+
+                & form {
+                    display: flex;
+
+                    border-radius: 55px;
+                    border-color: lightgray;
+                    border-style: solid;
+                    border-width: 1px;
+
+                    & #search {
+                        border-radius: 55px;
+                        border-style: none;
+
+                        display: inline-block;
+                        height: 45px;
+                        width: 100%;
+
+                        margin-left: 10px;
+
+                        &:focus {
+                            border: none !important;
+                            border-style: none;
+                            outline: 0 !important;
+                        }
+
+                        &:disabled {
+                            background-color: white;
+                        }
+                    }
+
+                    & #submit {
+                        border-radius: 55px;
+                        border-style: none;
+
+                        display: inline-block;
+                        height: 35px;
+                        width: 45px;
+
+                        margin-top: 5px;
+                        margin-bottom: 5px;
+                        margin-right: 5px;
+
+                        background-color: white;
+
+                        &:hover {
+                            cursor: pointer;
+                        }
+                    }
+                }
+            }
+
+            & img {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        #cursor {
+            cursor: none;
+            pointer-events: none;
+            position: fixed;
+
+            & img {
+                height: 30px;
+            }
+
+            &.click {
+                & img {
+                    animation-name: click;
+                    animation-duration: .5s;
+                }
+            }
+
+            &.gotoSearch {
+                animation-name: gotoSearch;
+                animation-duration: 2s;
+            }
+
+            &.gotoSubmit {
+                animation-name: gotoSubmit;
+                animation-duration: 2s;
+            }
+
+            animation-timing-function: ease-in-out;
+            animation-fill-mode: forwards;
+
+            left: 2%;
+            top: 2%;
+        }
+
+        @keyframes click {
+
+            to,
+            from {
+                height: 30px;
+            }
+
+            20%,
+            80% {
+                height: 25px;
+            }
+        }
+
+        @keyframes gotoSearch {
+            to {
+                left: var(--searchx);
+                top: var(--searchy);
+            }
+        }
+
+        @keyframes gotoSubmit {
+            from {
+                left: var(--searchx);
+                top: var(--searchy);
+            }
+
+            to {
+                left: var(--submitx);
+                top: var(--submity);
+            }
+        }
+
+        @media only screen and (max-width: 1000px) {
+            #top {
+                & #side {
+                    left: 3%;
+                    right: 3%;
+
+                    & form {
+                        & #search {
+                            height: 55px;
+                            margin-left: 15px;
+                        }
+
+                        & #submit {
+                            height: 45px;
+                        }
+                    }
+                }
+
+                & img {
+                    width: 170px !important;
+                    height: 82.47px !important;
+                }
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+
+            body,
+            #search,
+            #submit {
+                background-color: #202124 !important;
+                color: white;
+            }
+        }
+
+        input[type=search]::-ms-clear {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
+        input[type=search]::-ms-reveal {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
+        input[type="search"]::-webkit-search-decoration,
+        input[type="search"]::-webkit-search-cancel-button,
+        input[type="search"]::-webkit-search-results-button,
+        input[type="search"]::-webkit-search-results-decoration {
+            display: none;
+        }
+    </style>
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        const params = new Proxy(new URLSearchParams(window.location.search), {
+            get: (searchParams, prop) => searchParams.get(prop),
+        });
+        function show() {
+            if (document.getElementById("search").value.trim() != "" && (params.q == null || params.q.trim() == "")) {
+                text = encodeURIComponent(document.getElementById("search").value.trim());
+                if (main.trim() == "") {
+                    url = window.location.href.split("?")[0] + "?q=" + text;
+                } else {
+                    url = main + "?q=" + text;
+                }
+                Swal.fire({
+                    text: url,
+                    showCancelButton: true,
+                    confirmButtonText: "Copy",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        navigator.clipboard.writeText(url);
+                    }
+                });
+            }
+        }
+        function resize() {
+            // search
+            root.style.setProperty("--searchx", ((search.getBoundingClientRect().left + 15) / window.innerWidth * 100).toFixed(2) + "%");
+            root.style.setProperty("--searchy", ((search.getBoundingClientRect().top + 35) / window.innerHeight * 100).toFixed(2) + "%");
+            // submit
+            root.style.setProperty("--submitx", ((submit.getBoundingClientRect().left + 20) / window.innerWidth * 100).toFixed(2) + "%");
+            root.style.setProperty("--submity", ((submit.getBoundingClientRect().top + 20) / window.innerHeight * 100).toFixed(2) + "%");
+        }
+    </script>
+</head>
+
+<body>
+    <div id="header">
+
+    </div>
+    <div id="top">
+        <img style="width: 300px; height: 145.54px; user-select: none;" alt="LMGTFY logo" id="imageLogo">
+        <script>
+            document.getElementById("imageLogo").src = main + "media/lmgtfy.png";
+        </script>
+        <div id="side">
+            <wbr>
+            <form onsubmit="event.preventDefault(); show();">
+                <input type="search" id="search" autofocus autocomplete="off" name="q">
+                <input type="submit" id="submit" class="material-symbols-outlined" value="search"
+                    style="font-size: medium;">
+                <script>
+                    search = document.getElementById("search");
+                    submit = document.getElementById("submit");
+                    items = [
+                        "What is the internet?",
+                        "How do I fix ... ?",
+                        "Why is the sky blue?",
+                        "What causes earthquakes?",
+                        "How do plants make food?",
+                        "What is the capital of France?",
+                        "How do magnets work?",
+                        "Why do we yawn?",
+                        "What are the different states of matter?",
+                        "How do birds fly?",
+                        "What is the purpose of the moon?",
+                        "Why do we dream?",
+                        "What is photosynthesis?",
+                        "How do cameras work?",
+                        "Why do leaves change color in the fall?",
+                        "What causes thunder and lightning?",
+                        "How do computers work?",
+                        "What is gravity?",
+                        "Why is water wet?",
+                        "How do airplanes stay in the air?"
+                    ];
+                    if (params.q == null || params.q.trim() == "") {
+                        search.setAttribute("placeholder", items[Math.floor(Math.random() * items.length)]);
+                    }
+                    else {
+                        search.setAttribute("disabled", "");
+                        search.setAttribute("placeholder", "Search ...");
+                    }
+                </script>
+            </form>
+        </div>
+    </div>
+    <div id="cursor" hidden><img id="imageCursor"></div>
+    <script>
+        document.getElementById("imageCursor").src = main + "media/cursor-idle.png";
+    </script>
+    <script>
+        document.getElementById("imageLogo").ondragstart = function () { return false; }
+        root = document.querySelector(":root")
+        cursor = document.getElementById("cursor");
+        async function load() {
+            if (params.about != null) {
+                Swal.fire({
+                    text: "lmgtfy is an open-source project created by JHubi1. Visit the GitHub repository to learn more.",
+                    showCancelButton: true,
+                    confirmButtonText: "Visit GitHub",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.replace("https://github.com/JHubi1/lmgtfy")
+                    } else {
+                        window.location.replace((main.trim() == "") ? window.location.href.split("?")[0] : main);
+                    }
+                });
+            } else if (params.q == null || params.q.trim() == "") { }
+            else {
+                cursor.removeAttribute("hidden");
+                cursor.classList.add("gotoSearch");
+                setTimeout(function () {
+                    cursor.classList.add("click");
+                    setTimeout(function () { cursor.classList.remove("click") }, 500);
+                }, 1800);
+                setTimeout(function () {
+                    var txt = params.q;
+                    var i = 0;
+                    var speed = 50;
+                    function typeWriter() {
+                        if (i < txt.length) {
+                            search.value += txt.charAt(i);
+                            search.scrollLeft = search.scrollWidth;
+                            i++;
+                            setTimeout(typeWriter, speed);
+                        }
+                    }
+                    typeWriter();
+                    setTimeout(function () {
+                        cursor.classList.add("gotoSubmit");
+                        setTimeout(function () {
+                            cursor.classList.add("click");
+                            setTimeout(function () { cursor.classList.remove("click") }, 500);
+                        }, 1900);
+                        setTimeout(function () {
+                            Swal.fire({
+                                text: "Was it really that difficult?",
+                                timer: 2000,
+                                showConfirmButton: false,
+                                timerProgressBar: true,
+                            }).then((result) => {
+                                window.location.replace(searchEngine.replace("$1", encodeURIComponent(params.q)));
+                            });
+                        }, 2500);
+                    }, (txt.length * 50) + 500);
+                }, 2000);
+            }
+        }
+        window.onload = function () {
+            resize();
+            load();
+        }
+        window.onresize = function (event) {
+            resize();
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</body>
+
+</html>
